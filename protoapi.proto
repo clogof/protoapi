@@ -6,6 +6,7 @@ service Random {
     rpc GetDate (RequestDateTime) returns (DateTime);
     rpc GetRandom (RandomParams) returns (RandomInt);
     rpc GetRandomPass (RequestPass) returns (RandomPass);
+    rpc GetSum (Summands) returns (Sum);
 }
 
 // For random number
@@ -35,4 +36,14 @@ message RequestPass {
 
 message RandomPass {
     string Password = 1;
+}
+
+// For sum
+message Summands {
+    int64 FirstNum = 1;
+    int64 SecondNum = 2;
+}
+
+message Sum {
+    int64 SumValue = 1;
 }

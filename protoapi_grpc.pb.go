@@ -25,6 +25,7 @@ type RandomClient interface {
 	GetDate(ctx context.Context, in *RequestDateTime, opts ...grpc.CallOption) (*DateTime, error)
 	GetRandom(ctx context.Context, in *RandomParams, opts ...grpc.CallOption) (*RandomInt, error)
 	GetRandomPass(ctx context.Context, in *RequestPass, opts ...grpc.CallOption) (*RandomPass, error)
+	GetSum(ctx context.Context, in *Summands, opts ...grpc.CallOption) (*Sum, error)
 }
 
 type randomClient struct {
@@ -62,6 +63,15 @@ func (c *randomClient) GetRandomPass(ctx context.Context, in *RequestPass, opts 
 	return out, nil
 }
 
+func (c *randomClient) GetSum(ctx context.Context, in *Summands, opts ...grpc.CallOption) (*Sum, error) {
+	out := new(Sum)
+	err := c.cc.Invoke(ctx, "/Random/GetSum", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RandomServer is the server API for Random service.
 // All implementations must embed UnimplementedRandomServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type RandomServer interface {
 	GetDate(context.Context, *RequestDateTime) (*DateTime, error)
 	GetRandom(context.Context, *RandomParams) (*RandomInt, error)
 	GetRandomPass(context.Context, *RequestPass) (*RandomPass, error)
+	GetSum(context.Context, *Summands) (*Sum, error)
 	mustEmbedUnimplementedRandomServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedRandomServer) GetRandom(context.Context, *RandomParams) (*Ran
 }
 func (UnimplementedRandomServer) GetRandomPass(context.Context, *RequestPass) (*RandomPass, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandomPass not implemented")
+}
+func (UnimplementedRandomServer) GetSum(context.Context, *Summands) (*Sum, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSum not implemented")
 }
 func (UnimplementedRandomServer) mustEmbedUnimplementedRandomServer() {}
 
@@ -152,6 +166,24 @@ func _Random_GetRandomPass_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Random_GetSum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Summands)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RandomServer).GetSum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Random/GetSum",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RandomServer).GetSum(ctx, req.(*Summands))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Random_ServiceDesc is the grpc.ServiceDesc for Random service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var Random_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRandomPass",
 			Handler:    _Random_GetRandomPass_Handler,
+		},
+		{
+			MethodName: "GetSum",
+			Handler:    _Random_GetSum_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
